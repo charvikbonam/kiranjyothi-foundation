@@ -374,21 +374,48 @@ document.addEventListener('DOMContentLoaded',function(){
   // telegram links
   $$('[data-tg]').forEach(function(a){a.href=tgLink();a.target='_blank';a.rel='noopener'});
 
-  // contact form
+  // contact form  —  >>> ONLY THIS BLOCK WAS CHANGED <<<
   var cf=$('#contactForm');
   if(cf){cf.addEventListener('submit',function(e){
-    e.preventDefault(); var s=$('#cfStatus'),btn=$('button',cf);
-    var d={name:cf.name.value.trim(),phone:cf.phone.value.trim(),topic:cf.topic.value,msg:cf.message.value.trim()};
-    var text='📩 New message from website\nName: '+d.name+'\nPhone: '+d.phone+'\nTopic: '+d.topic+'\n\n'+d.msg;
+    e.preventDefault();
+    var s=$('#cfStatus'),btn=$('button',cf);
+    var payload={
+      name:cf.name.value.trim(),
+      phone:cf.phone.value.trim(),
+      topic:cf.topic.value,
+      message:cf.message.value.trim(),
+      website:''                                   // honeypot — always empty for humans
+    };
     btn.disabled=true; btn.textContent='Sending…';
-    sendTelegram(text).then(function(ok){
-      if(ok===true){s.className='status ok';s.textContent='Thank you! Your message was delivered to our Telegram. We will reply soon.';cf.reset()}
-      else if(ok===null){
-        var done=function(){s.className='status ok';s.textContent='Your message is copied. Telegram is opening — just paste and send it to us.';window.open(tgLink(),'_blank')};
-        if(navigator.clipboard)navigator.clipboard.writeText(text).then(done,done);else done();
-      } else {s.className='status err';s.textContent='Sorry, the message could not be sent. Please tap the Telegram button to message us directly.'}
-    }).catch(function(){s.className='status err';s.textContent='Network error. Please message us on Telegram directly.'})
-    .then(function(){btn.disabled=false;btn.textContent='Send via Telegram'});
+    s.className='status'; s.textContent='';
+    fetch('/api/contact',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(payload)
+    }).then(function(r){
+      return r.json().catch(function(){return {}}).then(function(j){return {status:r.status, body:j}});
+    }).then(function(res){
+      if(res.status===200 && res.body.ok){
+        s.className='status ok';
+        s.textContent='Thank you! Your message was delivered to our Telegram. We will reply soon.';
+        cf.reset();
+      } else if(res.status===429){
+        s.className='status err';
+        s.textContent='Too many messages from this device. Please try again later, or message us on Telegram directly.';
+      } else if(res.status===503){
+        s.className='status err';
+        s.textContent='The contact form is not configured yet. Opening Telegram so you can message us directly…';
+        window.open(tgLink(),'_blank');
+      } else {
+        s.className='status err';
+        s.textContent=(res.body && res.body.error) ? res.body.error : 'Sorry, the message could not be sent. Please message us on Telegram directly.';
+      }
+    }).catch(function(){
+      s.className='status err';
+      s.textContent='Network error. Please message us on Telegram directly.';
+    }).then(function(){
+      btn.disabled=false; btn.textContent='Send via Telegram';
+    });
   })}
 
   // achievements page (filters)
