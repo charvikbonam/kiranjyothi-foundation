@@ -39,10 +39,10 @@ UPLOAD_DIR = os.path.join(BASE_DIR, 'uploads')
 DB_PATH = os.environ.get('DB_PATH', os.path.join(BASE_DIR, 'data.db'))
 SEED_JSON = os.path.join(BASE_DIR, 'data', 'achievements.json')
 
-ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'change-this-password')
-SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-only-change-me')
-TG_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
-TG_CHAT = os.environ.get('TELEGRAM_CHAT_ID', '')
+ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'Itismebro')
+SECRET_KEY = os.environ.get('SECRET_KEY', 'Itismebro')
+TG_TOKEN = os.environ.get('8991387127:AAGS8TDfqJdLr3DuV4q24YuL8uJ-kN8p54I', '')
+TG_CHAT = os.environ.get('8801641740', '')
 TOKEN_HOURS = 12
 ALLOWED_EXT = {'jpg', 'jpeg', 'png', 'gif', 'webp'}
 CATEGORIES = {'academic', 'social', 'spiritual', 'agri', 'family', 'startups', 'general'}
